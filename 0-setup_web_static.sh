@@ -19,6 +19,13 @@ sudo ln -s -f /data/web_static/releases/test/ /data/web_static/current
 
 sudo chown -R ubuntu:ubuntu /data/
 
-sudo sed -i '/listen 80 default_server/a location /hbnb_static { alias /data/web_static/current/;}' /etc/nginx/sites-enabled/default
+sudo sed -i '/hbnb_static/ {
+    s/^#//
+    s|root /var/www/html;|root /data/web_static/current/;|
+    s|try_files $uri $uri/ =404;|try_files $uri $uri/ =404;|
+    s|location /hbnb_static/ { alias /data/web_static/current/; }|location /hbnb_static/ { alias /data/web_static/current/; }|
+}' /etc/nginx/sites-available/default
 
 sudo service nginx restart
+
+exit 0
