@@ -2,27 +2,25 @@
 """ distributes arcive to web servers using do_deploy """
 from fabric.api import run, put, env
 import os
+env.hosts = ['54.162.95.23', '52.201.219.244']
 
 
 def do_deploy(archive_path):
-    """ uncompress and deploy archive into servers """
-    env.hosts = ['54.162.95.23', '52.201.219.244']
-    if os.path.exists(archive_path) is False:
+    """ distributes archive to web servers """
+    if not os.path.exists(archive_path):
         return False
-    dpath = '/data/web_static/releases/'
-    tmp = archive_path.split('.')[0]
-    name = tmp.split('/')[1]
-    dest = dpath + name
 
     try:
-        put(archive_path, '/tmp')
-        run('sudo mkdir -p {}'.format(dest))
-        run('sudo tar -xzf /tmp/{}.tgz -C {}'.format(name, dest))
-        run('sudo rm -f /tmp/{}.tgz'.format(name))
-        run('sudo mv {}/web_static/* {}/'.format(dest, dest))
-        run('sudo rm -rf {}/web_static'.format(dest))
-        run('sudo rm -rf /data/web_static/current')
-        run('sudo ln -s {} /data/web_static/current'.format(dest))
+        archive_n = archive_path.split("/")[-1]
+        archive_f = "/data/web_static/releases/" + archive_n.split(".")[0]
+        put(archive_path, '/tmp/')
+        run('mkdir -p {}/'.format(archive_f))
+        run('tar -xzf /tmp/{} -C {}/'.format(archive_n, archive_f))
+        run('rm /tmp/{}'.format(archive_n))
+        run('mv {}/web_static/* {}/'.format(archive_f))
+        run('rm -rf {}/web_static'.format(archive_f))
+        run('rm -rf /data/web_static/current')
+        run('ln -s {}/ /data/web_static/current'.format(archive_f))
         return True
-    except Exception:
+    except:
         return False
